@@ -25,40 +25,60 @@ instance FromRow User where
 instance ToRow User where
   toRow (User id_ fName lName c s) = toRow(fName, lName, c, s)
 
-data UserField = UserField Int T.Text T.Text Int Int deriving (Show)
+data UserField = UserField Int T.Text T.Text Double Double deriving (Show)
 instance FromRow UserField where
   fromRow = UserField <$> field <*> field <*> field <*> field <*> field
 instance ToRow UserField where
   toRow (UserField id_ fname lname checking savings) = toRow (id_, fname, lname, checking, savings)
 
-data Sav = Sav Integer deriving (Show)
-instance FromRow Sav where
-  fromRow = Sav <$> field
-
 instance FromRow Int where
   fromRow = field
 
-
-displayUser = do
+{-
+  Displays all the users in THe dataBase
+-}
+displayUsers = do
   conn <- open "Bank.db"
   r <- query_ conn "SELECT * from users" :: IO[UserField]
+  close conn
   mapM_ print r
+{-
+  Display A User's information in the dataBase
+-}
+displayUser userId = do
+  conn <-open "Bank.db"
+  [amt] <- query conn "SELECT * from users where id=?" (Only userId) :: IO [UserField]
+  close conn
+  print amt
 
--- Add a user to the database
+{-
+  Create a user based onthe parameters that are passed in, first and last name.
+  This function will create a Table for the users if the table doesnt exist yet otherwise
+  It will append to the table. Will initialize the checking and savings to 0.
+-}
+addUser firstN lastN = do
+  conn <- open "Bank.db"
+  execute_ conn "CREATE TABLE IF NOT EXISTS users (id Integer PRIMARY KEY, fName TEXT, lName TEXT, checking DOUBLE, savings DOUBLE)"
+  execute conn "INSERT INTO users (fName, lName, checking, savings) VALUES (?,?,?,?)"
+                (firstN, lastN, 0::Double, 0::Double)
+  close conn;
+
+{-
 addUser = do
   conn <- open "Bank.db"
-  execute_ conn "CREATE TABLE IF NOT EXISTS users (id Integer PRIMARY KEY, fName TEXT, lName TEXT, checking INTEGER, savings INTEGER)"
+  execute_ conn "CREATE TABLE IF NOT EXISTS users (id Integer PRIMARY KEY, fName TEXT, lName TEXT, checking DOUBLE, savings DOUBLE)"
 
   putStrLn "Enter First Name: "
   fname <- getLine
   putStrLn "Enter Last Name: "
   lname <- getLine
-  let c = 0 :: Integer
-  let s = 0 :: Integer
+  let c = 0 :: Double
+  let s = 0 :: Double
 
   execute conn "INSERT INTO users (fName, lName, checking, savings) VALUES (?,?,?,?)"
                (fname, lname, c, s)
   close conn
+-}
 {-
   Remove a user from the database base. Uses the usersId to delete them
 -}
@@ -77,6 +97,7 @@ modSavings userId amnt = do
   conn <- open "Bank.db"
   executeNamed conn "UPDATE users SET savings = :savings WHERE id = :id" [":savings" := amnt, ":id" := userId]
   close conn
+
 {-
   Modify a users checking to the parameter passed in as amnt. Must pass in the users
   Id to make the modification
@@ -86,3 +107,24 @@ modChecking userId amnt = do
   conn <- open "Bank.db"
   executeNamed conn "UPDATE users SET checking = :checking WHERE id = :id" [":checking" := amnt, ":id" := userId]
   close conn
+
+getUserId :: [Char] -> [Char] -> IO Int
+getUserId fname lname = do
+  conn <- open "Bank.db"
+  [id] <- query conn "SELECT id from users where fname = ? and lname = ?" (fname::String, lname::String) :: IO [Int]
+  close conn
+  return id
+
+getSavings :: Int -> IO Int
+getSavings userId = do
+  conn <- open "Bank.db"
+  [amt] <- query conn "SELECT savings from users where id=?" (Only userId) :: IO [Int]
+  close conn
+  return amt
+
+getChecking :: Int -> IO Int
+getChecking userId = do
+  conn <- open "Bank.db"
+  [amt] <- query conn "SELECT checking from users where id=?" (Only userId) :: IO [Int]
+  close conn
+  return amt
