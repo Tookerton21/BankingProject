@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
-
+ 
+module BuildData where
 import           Control.Applicative
 import           Data.Int (Int64)
 import           Data.Text (Text)
@@ -7,6 +8,7 @@ import qualified Data.Text as T
 import           Database.SQLite.Simple
 import           Database.SQLite.Simple.FromRow
 import Control.Monad
+
 
 data User =
   User
@@ -26,6 +28,7 @@ instance ToRow User where
   toRow (User id_ fName lName c s) = toRow(fName, lName, c, s)
 
 data UserField = UserField Int T.Text T.Text Double Double deriving (Show)
+
 instance FromRow UserField where
   fromRow = UserField <$> field <*> field <*> field <*> field <*> field
 instance ToRow UserField where
@@ -128,3 +131,11 @@ getChecking userId = do
   [amt] <- query conn "SELECT checking from users where id=?" (Only userId) :: IO [Int]
   close conn
   return amt
+
+
+--getCheckingTest :: Int -> IO Float
+--getCheckingTest userId = do
+--  conn <- open "Bank.db"
+--  [amt] <- query conn "SELECT checking from users where id=?" (Only userId) :: IO [Float]
+--  close conn
+--  return amt
