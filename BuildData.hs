@@ -59,11 +59,11 @@ displayUser userId = do
   This function will create a Table for the users if the table doesnt exist yet otherwise
   It will append to the table. Will initialize the checking and savings to 0.
 -}
-addUser firstN lastN = do
+addUser firstN lastN checkingAmout savingAmount = do
   conn <- open "Bank.db"
   execute_ conn "CREATE TABLE IF NOT EXISTS users (id Integer PRIMARY KEY, fName TEXT, lName TEXT, checking DOUBLE, savings DOUBLE)"
   execute conn "INSERT INTO users (fName, lName, checking, savings) VALUES (?,?,?,?)"
-                (firstN, lastN, 0::Double, 0::Double)
+                (firstN, lastN, checkingAmout, savingAmount)
   close conn;
 
 {-
