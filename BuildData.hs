@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
- 
+
 module BuildData where
 import           Control.Applicative
 import           Data.Int (Int64)
@@ -35,6 +35,9 @@ instance ToRow UserField where
   toRow (UserField id_ fname lname checking savings) = toRow (id_, fname, lname, checking, savings)
 
 instance FromRow Int where
+  fromRow = field
+
+instance FromRow Double where
   fromRow = field
 
 {-
@@ -118,18 +121,19 @@ getUserId fname lname = do
   close conn
   return id
 
-getSavings :: Int -> IO Int
+-- getSavings :: Int -> IO Int
 getSavings userId = do
   conn <- open "Bank.db"
-  [amt] <- query conn "SELECT savings from users where id=?" (Only userId) :: IO [Int]
+  [amt] <- query conn "SELECT savings from users where id=?" (Only userId) :: IO [Double]
   close conn
   return amt
 
-getChecking :: Int -> IO Int
+-- getChecking :: Int -> IO Double
 getChecking userId = do
   conn <- open "Bank.db"
-  [amt] <- query conn "SELECT checking from users where id=?" (Only userId) :: IO [Int]
+  [amt] <- query conn "SELECT checking from users where id=?" (Only userId) :: IO [Double]
   close conn
+  putStrLn "Just about to exit"
   return amt
 
 
