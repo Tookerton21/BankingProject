@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
-
+ 
+module BuildData where
 import           Control.Applicative
 import           Data.Int (Int64)
 import           Data.Text (Text)
@@ -7,6 +8,7 @@ import qualified Data.Text as T
 import           Database.SQLite.Simple
 import           Database.SQLite.Simple.FromRow
 import Control.Monad
+
 
 data User =
   User
@@ -26,6 +28,7 @@ instance ToRow User where
   toRow (User id_ fName lName c s) = toRow(fName, lName, c, s)
 
 data UserField = UserField Int T.Text T.Text Double Double deriving (Show)
+
 instance FromRow UserField where
   fromRow = UserField <$> field <*> field <*> field <*> field <*> field
 instance ToRow UserField where
@@ -56,11 +59,11 @@ displayUser userId = do
   This function will create a Table for the users if the table doesnt exist yet otherwise
   It will append to the table. Will initialize the checking and savings to 0.
 -}
-addUser firstN lastN = do
+addUser firstN lastN checkingAmout savingAmount = do
   conn <- open "Bank.db"
   execute_ conn "CREATE TABLE IF NOT EXISTS users (id Integer PRIMARY KEY, fName TEXT, lName TEXT, checking DOUBLE, savings DOUBLE)"
   execute conn "INSERT INTO users (fName, lName, checking, savings) VALUES (?,?,?,?)"
-                (firstN, lastN, 0::Double, 0::Double)
+                (firstN, lastN, checkingAmout, savingAmount)
   close conn;
 
 {-
@@ -128,3 +131,11 @@ getChecking userId = do
   [amt] <- query conn "SELECT checking from users where id=?" (Only userId) :: IO [Int]
   close conn
   return amt
+
+
+--getCheckingTest :: Int -> IO Float
+--getCheckingTest userId = do
+--  conn <- open "Bank.db"
+--  [amt] <- query conn "SELECT checking from users where id=?" (Only userId) :: IO [Float]
+--  close conn
+--  return amt
