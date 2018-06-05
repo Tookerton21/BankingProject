@@ -51,28 +51,29 @@ instance FromRow Double where
 -}
 updateHistory userId accountT amnt day month year = do
   conn <- open "History.db"
-  execute_ conn "CREATE TABLE IF NOT EXISTS history (id Integer, accountT TEXT, amnt DOUBLE, day INTEGER, month, INTEGER, year INTEGER, FOREIGN KEY (id) REFERENCES user(id))"
+  execute_ conn "CREATE TABLE IF NOT EXISTS history (id Integer, accountT TEXT, amnt DOUBLE, day INTEGER, month INTEGER, year INTEGER, FOREIGN KEY (id) REFERENCES user(id))"
   execute conn "INSERT INTO history(id, accountT, amnt, day, month, year) VALUES (?,?,?,?,?,?)"
                 (userId, accountT, amnt, day, month, year)
   close conn
+  putStrLn "updated"
 
 {-
   Display user's transaction history
 -}
 displayHistory userId = do
   conn <- open "History.db"
-  [r] <- query conn "Select * from history WHERE id=?" (Only userId) :: IO [History]
+  r <- query conn "Select * from history WHERE id=?" (Only userId) :: IO [History]
   close conn
-  print r
+  mapM_ print r
 
 {-
   TESTING FUNCTION to display all transactions that have occured
 -}
-displayAllHistory = do
+dHistorys = do
   conn <- open "History.db"
-  [r] <- query_ conn "SELECT * FROM history" :: IO[History]
+  r <- query_ conn "SELECT * FROM history" :: IO[History]
   close conn
-  print r
+  mapM_ print r
 
 {-
   Displays all the users in THe dataBase
