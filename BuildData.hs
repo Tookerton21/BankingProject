@@ -28,6 +28,12 @@ instance ToRow User where
   toRow (User id_ fName lName c s) = toRow(fName, lName, c, s)
 
 data UserField = UserField Int T.Text T.Text Double Double deriving (Show)
+data History = History Int T.Text Double Int Int Int deriving(Show) --(userId, Account, Amnt, day, month, year)
+
+instance FromRow History where
+  fromRow = History <$> field <*> field <*> field <*> field <*> field <*> field
+instance ToRow History where
+  toRow (History userid accountT amnt day month year) = toRow (userid, accountT, amnt, day, month, year)
 
 instance FromRow UserField where
   fromRow = UserField <$> field <*> field <*> field <*> field <*> field
@@ -39,6 +45,34 @@ instance FromRow Int where
 
 instance FromRow Double where
   fromRow = field
+
+{-
+  Add to transaction dataBase
+-}
+updateHistory userId accountT amnt day month year = do
+  conn <- open "History.db"
+  execute_ conn "CREATE TABLE IF NOT EXISTS history (id Integer, accountT TEXT, amnt DOUBLE, day INTEGER, month, INTEGER, year INTEGER, FOREIGN KEY (id) REFERENCES user(id))"
+  execute conn "INSERT INTO history(id, accountT, amnt, day, month, year) VALUES (?,?,?,?,?,?)"
+                (userId, accountT, amnt, day, month, year)
+  close conn
+
+{-
+  Display user's transaction history
+-}
+displayHistory userId = do
+  conn <- open "History.db"
+  [r] <- query conn "Select * from history WHERE id=?" (Only userId) :: IO [History]
+  close conn
+  print r
+
+{-
+  TESTING FUNCTION to display all transactions that have occured
+-}
+displayAllHistory = do
+  conn <- open "History.db"
+  [r] <- query_ conn "SELECT * FROM history" :: IO[History]
+  close conn
+  print r
 
 {-
   Displays all the users in THe dataBase
@@ -69,22 +103,7 @@ addUser firstN lastN checkingAmout savingAmount = do
                 (firstN, lastN, checkingAmout, savingAmount)
   close conn;
 
-{-
-addUser = do
-  conn <- open "Bank.db"
-  execute_ conn "CREATE TABLE IF NOT EXISTS users (id Integer PRIMARY KEY, fName TEXT, lName TEXT, checking DOUBLE, savings DOUBLE)"
 
-  putStrLn "Enter First Name: "
-  fname <- getLine
-  putStrLn "Enter Last Name: "
-  lname <- getLine
-  let c = 0 :: Double
-  let s = 0 :: Double
-
-  execute conn "INSERT INTO users (fName, lName, checking, savings) VALUES (?,?,?,?)"
-               (fname, lname, c, s)
-  close conn
--}
 {-
   Remove a user from the database base. Uses the usersId to delete them
 -}
@@ -134,11 +153,3 @@ getChecking userId = do
   [amt] <- query conn "SELECT checking from users where id=?" (Only userId) :: IO [Double]
   close conn
   return amt
-
-
---getCheckingTest :: Int -> IO Float
---getCheckingTest userId = do
---  conn <- open "Bank.db"
---  [amt] <- query conn "SELECT checking from users where id=?" (Only userId) :: IO [Float]
---  close conn
---  return amt
