@@ -9,7 +9,6 @@ import           Database.SQLite.Simple
 import           Database.SQLite.Simple.FromRow
 import Control.Monad
 
-
 data User =
   User
   { id        :: Int64
