@@ -1,4 +1,13 @@
 # BankingProject
+6/4/18
+Added WireTransfer to UI:
+	Transfers money from one users checking account to another users account.
+	Ensures that the user that is sending funds has sufficient funds, and if
+	not then nothing happens
+
+Added TranStoC to UI:
+	Transfers money from a users savings to their checking account. Ensures that
+	the user has sufficient funds in their savings before doing such a transaction.
 
 5/31/18
 I started cleaning up the project, and added two new deliverables of 
