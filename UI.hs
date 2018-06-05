@@ -9,17 +9,64 @@ main = do
  putStrLn "Menu of HaskeshBank: "
  putStrLn "1: To add User"
  putStrLn "2: Display all Users"
- putStrLn "3: Check checking balance"
- putStrLn "4: Check savings balance"
+ putStrLn "3: Display checking balance"
+ putStrLn "4: Display savings balance"
  putStrLn "5: Remove User"
- putStrLn "6: Exit"
+ putStrLn "6: Wire transfer"
+ putStrLn "7: Transfer to saving to checking"
+ putStrLn "8: Exit"
  option <- readLn :: IO Int
  if(option == 1) then addUserUI
   else if (option == 2) then displayUsers
   else if (option == 3) then checkingAmnt
   else if (option == 4) then savingsAmnt
   else if (option == 5) then removeUserUI
-  else if (option == 6) then return () else return()
+  else if (option == 6) then tranMoney
+  else if (option == 7) then tranStoC
+  else if (option == 8) then return () else return()
+
+tranStoC = do
+  putStrLn "Enter User Id"
+  userId <- readLn :: IO Int
+
+  putStrLn "Amount to transfer to Checking"
+  amnt <- readLn :: IO Double
+
+  cBalance1 <- getSavings userId
+  cBalance2 <- getChecking userId
+  let nBalance1 = cBalance1 - amnt
+  let nBalance2 = cBalance2 + amnt
+
+  if nBalance1 > 0
+    then do
+      modSavings userId nBalance1
+      modChecking userId nBalance2
+      putStrLn "Transfer complete"
+    else
+      putStrLn "Insuffienct Funds"
+
+tranMoney = do
+  putStrLn "From Id Num: "
+  userIdF <- readLn :: IO Int
+
+  putStrLn "To Id Num: "
+  userIdT <- readLn :: IO Int
+
+  putStrLn "Amount to transfer: "
+  amnt <- readLn :: IO Double
+
+  cBalance1 <- getChecking userIdF -- balance from sending account
+  cBalance2 <- getChecking userIdT -- balance for receiving account
+  let nBalance1 = cBalance1 - amnt  -- new balance from sending account
+  let nBalance2 = cBalance2 + amnt
+  if nBalance1 > 0
+    then do
+      modChecking userIdF nBalance1 -- update sending acount
+      modChecking userIdT nBalance2 -- update receiving account
+      putStrLn "Transfer complete"
+    else
+      putStrLn "Insufficient funds"
+
 
 -- checkingAmnt :: IO ()
 checkingAmnt = do

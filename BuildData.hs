@@ -108,7 +108,7 @@ modSavings userId amnt = do
   Modify a users checking to the parameter passed in as amnt. Must pass in the users
   Id to make the modification
 -}
-modChecking  :: Int -> Double -> IO ()
+-- modChecking  :: Int -> Double -> IO ()
 modChecking userId amnt = do
   conn <- open "Bank.db"
   executeNamed conn "UPDATE users SET checking = :checking WHERE id = :id" [":checking" := amnt, ":id" := userId]
@@ -133,7 +133,6 @@ getChecking userId = do
   conn <- open "Bank.db"
   [amt] <- query conn "SELECT checking from users where id=?" (Only userId) :: IO [Double]
   close conn
-  putStrLn "Just about to exit"
   return amt
 
 
