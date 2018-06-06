@@ -18,15 +18,16 @@ main = do
  putStrLn "8: Display Transaction History"
  putStrLn "9: Exit"
  option <- readLn :: IO Int
- if(option == 1) then addUserUI
-  else if (option == 2) then displayUsers
-  else if (option == 3) then checkingAmnt
-  else if (option == 4) then savingsAmnt
-  else if (option == 5) then removeUserUI
-  else if (option == 6) then tranMoney
-  else if (option == 7) then tranStoC
-  else if (option == 8) then displayH
-  else if (option == 9) then return () else return()
+ case option of
+  1 -> addUserUI >> main
+  2 -> displayUsers >> main
+  3 -> checkingAmnt >> main
+  4 -> savingsAmnt >> main
+  5 -> removeUserUI >> main
+  6 -> tranMoney >> main
+  7 -> tranStoC >> main
+  8 -> displayH >> main
+  9 -> return()
 
 displayH = do
   putStrLn "Enter User Id"

@@ -9,7 +9,7 @@ import           Database.SQLite.Simple
 import           Database.SQLite.Simple.FromRow
 import Control.Monad
 
-
+{-
 data User =
   User
   { id        :: Int64
@@ -18,14 +18,14 @@ data User =
   , checking  :: Double
   , savings   :: Double
   } deriving (Eq, Read, Show)
+-}
 
 
+--instance FromRow User where
+--  fromRow = User <$> field <*> field <*> field <*> field <*> field
 
-instance FromRow User where
-  fromRow = User <$> field <*> field <*> field <*> field <*> field
-
-instance ToRow User where
-  toRow (User id_ fName lName c s) = toRow(fName, lName, c, s)
+-- instance ToRow User where
+--  toRow (User id_ fName lName c s) = toRow(fName, lName, c, s)
 
 data UserField = UserField Int T.Text T.Text Double Double deriving (Show)
 data History = History Int T.Text Double Int Int Int deriving(Show) --(userId, Account, Amnt, day, month, year)
